@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" /><title>Zelda-Like</title>
+    <script
+src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css"> body { margin: 0; }</style>
+</head>
+
+
+<body>
+    <script type="text/javascript">
+
+        class BiomeRose extends Phaser.Scene {
+            constructor() {
+                super("BiomeRose")
+                
+            }
+        }
+
+
+            function preload(){
+
+                this.load.image('hubDebut', 'Assets/HUB.png');
+                this.load.tilemapTiledJSON('hubCarte', 'Hub.json');
+                this.load.spritesheet ('Hero', 'Assets/Hero Final.png' ,
+                {frameWidth : 64, frameHeight : 110});
+                this.load.spritesheet ('BarreDeVie', 'Assets/BarreDeVie.png' ,
+                {frameWidth : 100, frameHeight : 24});
+
+            }
+
+            var hero;
+            var cursors;
+            var gameOver = false;
+            var camera;
+            var carteHub;
+            var pv;
+
+            function create(){
+
+                //HUB
+                const carteHub = this.add.tilemap('hubCarte');
+
+                const tileset = carteHub.addTilesetImage(
+                    "HUB",
+                    "hubDebut"
+                );
+                
+                const calqueSol = carteHub.createStaticLayer(
+                    "Sol",
+                    tileset
+                );
+
+                const solide = carteHub.createStaticLayer(
+                    "solide",
+                    tileset
+                );
+
+                hero = this.physics.add.sprite (475,470, 'Hero');
+                hero.setCollideWorldBounds(true);
+
+                this.physics.add.collider(hero, solide);
+
+                solide.setCollisionByProperty({ solide: true });   
+
+                this.cameras.main.zoom = 1;
+                this.physics.world.setBounds(0, 0, 640, 640);
+                this.cameras.main.setBounds(0, 0, 640, 640);
+                this.cameras.main.startFollow(hero);
+
+                pv = this.physics.add.sprite(80,60, 'BarreDeVie');
+                pv.setScrollFactor(0);
+
+                //Anims Héro
+                this.anims.create({
+                    key: 'front',
+                    frames: this.anims.generateFrameNumbers('Hero', {start:0,end:3}),
+                    frameRate: 5,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'back',
+                    frames: this.anims.generateFrameNumbers('Hero', {start:5,end:7}),
+                    frameRate: 5,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'right',
+                    frames: this.anims.generateFrameNumbers('Hero', {start:9,end:11}),
+                    frameRate: 5,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'left',
+                    frames: this.anims.generateFrameNumbers('Hero', {start:12,end:15}),
+                    frameRate: 5,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key : 'iddle',
+                    frames : [ {key : 'Hero', frame : 0} ],
+                    framerate : 20
+                })
+                cursors = this.input.keyboard.createCursorKeys();
+
+                
+            }
+
+            function update(){
+                if (gameOver) return;
+
+                //Déplacements
+                if (cursors.up.isDown){
+                    hero.setVelocityY(-160);
+                    hero.anims.play('back', true);
+                }
+                else if (cursors.down.isDown){
+                    hero.setVelocityY(160);
+                    hero.anims.play('front', true);
+                }
+                
+                else if (cursors.right.isDown){
+                    hero.setVelocityX(160);
+                    hero.anims.play('right', true);
+                }
+                else if (cursors.left.isDown){
+                    hero.setVelocityX(-160);
+                    hero.anims.play('left', true);
+                }
+                else {
+                    hero.setVelocityY(0);
+                    hero.setVelocityX(0);
+                    hero.anims.play('iddle');
+                }
+            }
+
+            var config = {
+                input:{gamepad:true},
+                type: Phaser.AUTO,
+                width: 800, height: 450,
+                physics: {
+                default: 'arcade',
+                arcade: {
+                gravity: { y: 0 },
+                debug: true
+                }},
+                scene: {preload: preload, create: create, update: update }
+                };
+                new Phaser.Game(config);
+              
+        </script>
+</body>
+</html>
